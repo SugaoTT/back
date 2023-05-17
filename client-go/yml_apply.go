@@ -1,0 +1,54 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"os/exec"
+	"text/template"
+)
+
+func main() {
+
+	// Pod 名とコンテナイメージを設定する変数
+	podName := "r1"
+	containerImage := "frrouting/frr:v8.1.0"
+
+	// テンプレートを定義する
+	yamlTemplate := `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Name }}
+  labels:
+    app: frr
+spec:
+  containers:
+  - name: example-container
+    image: {{ .Image }}
+    ports:
+    - containerPort: 80
+`
+	// テンプレートを適用する
+	tmpl, err := template.New("yaml").Parse(yamlTemplate)
+	if err != nil {
+		fmt.Println("Error parsing YAML template: ", err)
+		return
+	}
+
+	var yamlBuffer bytes.Buffer
+	err = tmpl.Execute(&yamlBuffer, struct{ Name, Image string }{podName, containerImage})
+	if err != nil {
+		fmt.Println("Error executing YAML template: ", err)
+		return
+	}
+
+	// kubectl コマンドを実行する
+	cmd := exec.Command("kubectl", "apply", "-f", "-")
+	cmd.Stdin = &yamlBuffer
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("Error deploying Pod: ", err)
+		return
+	}
+	fmt.Println(string(output))
+}

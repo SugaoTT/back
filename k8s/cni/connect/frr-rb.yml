@@ -1,0 +1,91 @@
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: r1-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "r1-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: r1-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "r1-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-r1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "r1",
+      "node-name": "cni-worker-2",
+      "node-ip": "10.240.0.32",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "h1",
+            "target-pod-eth": "net1",
+            "target-node-name": "cni-worker-1",
+            "target-node-ip": "10.240.0.31",
+            "self-tunnel-id": "44",
+            "target-tunnel-id": "45",
+            "session-id": "1"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "h2",
+            "target-pod-eth": "net1",
+            "target-node-name": "cni-worker-2",
+            "target-node-ip": "10.240.0.32",
+            "self-tunnel-id": "",
+            "target-tunnel-id": "",
+            "session-id": ""
+          }
+        ]
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: r1-conf
+data:
+  vtysh.conf:
+    service integrated-vtysh-config
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: r1
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "r1-net1"},
+      {"name": "r1-net2"},
+      {"name": "connect-r1"}
+    ]'
+spec: 
+  nodeName: cni-worker-2
+  containers:
+  - name: frr
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true

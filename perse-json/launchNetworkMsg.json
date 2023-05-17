@@ -1,0 +1,26 @@
+{
+    "pod-uuid": "ea8a2bab-fc78-46cf-b401-7d58b57426e3",
+    "pod-name": "r1",
+    "interface": {
+      "items": [
+        {
+          "name": "net1",
+          "target-pod-uuid": "8a43762a-868b-4f3a-8395-095d90007d3c",
+          "target-pod-name": "h1",
+          "target-pod-eth": "net1",
+          "self-tunnel-id": "44",
+          "target-tunnel-id": "45",
+          "session-id": "1"
+        },
+        {
+          "name": "net2",
+          "target-pod-uuid": "5b97f545-3b9c-4dc7-94d7-7f78ce4a6f9e",
+          "target-pod-name": "h2",
+          "target-pod-eth": "net1",
+          "self-tunnel-id": "",
+          "target-tunnel-id": "",
+          "session-id": ""
+        }
+      ]
+    }
+}

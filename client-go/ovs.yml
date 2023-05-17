@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ovs
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: ovs
+      image: noiro/openvswitch:5.2.3.6.1d150da
+      command:
+        - "/sbin/init"

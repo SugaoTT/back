@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: centos:7
+      command:
+        - /bin/bash
+        - "-c"
+        - "echo 'Hello, World!' > /test.txt && ls -la"

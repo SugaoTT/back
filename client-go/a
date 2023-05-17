@@ -1,0 +1,55 @@
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+    "os"
+
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+    "k8s.io/apimachinery/pkg/runtime"
+    "k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+    "k8s.io/client-go/kubernetes"
+    "k8s.io/client-go/rest"
+    "k8s.io/client-go/tools/clientcmd"
+)
+
+func main() {
+    // Kubernetesクライアントセットを作成
+    clientset, err := getClientset()
+    if err != nil {
+        panic(err)
+    }
+
+    // YAMLファイルを読み込む
+    yamlFile, err := ioutil.ReadFile("path/to/pod.yaml")
+    if err != nil {
+        panic(err)
+    }
+
+    // YAMLファイルをUnstructuredオブジェクトに変換
+    decoder := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+    var unstructuredObj unstructured.Unstructured
+    _, _, err = decoder.Decode(yamlFile, nil, &unstructuredObj)
+    if err != nil {
+        panic(err)
+    }
+
+    // Unstructuredオブジェクトをruntime.Objectに変換
+    object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&unstructuredObj)
+    if err != nil {
+        panic(err)
+    }
+
+    // Podを作成
+    _, err = clientset.CoreV1().Pods("default").Create(&unstructured.Unstructured{Object: object})
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Println("Pod created successfully")
+}
+
+func getClientset() (*kubernetes.Clientset, error) {
+    // Kubernetesクライアントセットを作成するためのConfigを取得
+    config, err := rest.InClusterConfig()
+    if err != nil {

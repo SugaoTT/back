@@ -1,0 +1,31 @@
+{
+  "cniVersion": "0.3.0",
+  "type": "connect",
+  "pod-name": "r1",
+  "node-name": "cni-worker-2",
+  "node-ip": "10.240.0.32",
+  "interface": {
+    "items": [
+      {
+        "name": "net1",
+        "target-pod-name": "h1",
+        "target-pod-eth": "net1",
+        "target-node-name": "cni-worker-1",
+        "target-node-ip": "10.240.0.31",
+        "self-tunnel-id": "44",
+        "target-tunnel-id": "45",
+        "session-id": "1"
+      },
+      {
+        "name": "net2",
+        "target-pod-name": "h2",
+        "target-pod-eth": "net1",
+        "target-node-name": "cni-worker-2",
+        "target-node-ip": "10.240.0.32",
+        "self-tunnel-id": "",
+        "target-tunnel-id": "",
+        "session-id": ""
+      }
+    ]
+  }
+}

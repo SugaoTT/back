@@ -1,0 +1,87 @@
+package main
+
+import (
+	//"io"
+
+	"fmt"
+	"os"
+	"path/filepath"
+
+	//v1 "k8s.io/api/core/v1"
+	//corev1 "k8s.io/api/core/v1"
+
+	//"k8s.io/client-go/kubernetes"
+	//"k8s.io/client-go/kubernetes/scheme"
+	//restclient "k8s.io/client-go/rest"
+	//"k8s.io/client-go/tools/clientcmd"
+	//"k8s.io/client-go/tools/remotecommand"
+
+	"bytes"
+	"strings"
+
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/remotecommand"
+)
+
+func main() {
+	// Kubeconfigのファイルパスを指定
+	kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	config, _ := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	//client, _ := corev1client.NewForConfig(config)
+
+	_, _, err := ExecInPod(config, "default", "centos1")
+	if err != nil {
+
+	}
+	//@TODO ここで発行するとpingとかの出力を溜め込んじゃうから要改善
+	//fmt.Println(a)
+
+}
+
+func ExecInPod(config *rest.Config, namespace, podName string) (string, string, error) {
+	k8sCli, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return "", "", err
+	}
+	cmd := []string{
+		"ping",
+		"-c",
+		"3",
+		"127.0.0.1",
+	}
+	const tty = false
+	req := k8sCli.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespace).SubResource("exec") //.Param("container", containerName)
+	req.VersionedParams(
+		&v1.PodExecOptions{
+			Command: cmd,
+			Stdin:   false,
+			Stdout:  true,
+			Stderr:  true,
+			TTY:     tty,
+		},
+		scheme.ParameterCodec,
+	)
+
+	var stdout, stderr bytes.Buffer
+	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	if err != nil {
+		return "A", "B", err
+	}
+	err = exec.Stream(remotecommand.StreamOptions{
+		Stdin:  nil,
+		Stdout: &stdout,
+		Stderr: &stderr,
+	})
+	if err != nil {
+		return "C", "D", err
+	}
+	fmt.Println(strings.TrimSpace(stdout.String()))
+	return strings.TrimSpace(stdout.String()), strings.TrimSpace(stderr.String()), err
+}
