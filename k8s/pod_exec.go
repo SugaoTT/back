@@ -40,7 +40,7 @@ func Pod_exec(ws *websocket.Conn, outputCommand []string) {
 					if err != nil {
 					}
 					prevStdoutStr = stdout.String()
-					time.Sleep(time.Millisecond * 50)
+					time.Sleep(time.Millisecond * 5)
 				}
 			}
 		}
@@ -53,10 +53,11 @@ func Pod_exec(ws *websocket.Conn, outputCommand []string) {
 	}
 
 	//goルーチンの最後の処理が終わるまでwait
-	//time.Sleep(time.Millisecond * 200)
-	if isCommandComplate {
-		websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
-	}
+	time.Sleep(time.Millisecond * 200)
+	websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
+	// if isCommandComplate {
+	// 	websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
+	// }
 
 }
 

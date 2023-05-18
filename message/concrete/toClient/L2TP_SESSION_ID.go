@@ -4,21 +4,23 @@ import (
 	"encoding/json"
 )
 
-type L2TP_SESSION_ID struct {
+type L2TP_INFO struct {
 	AbstractMessage
-	SessionID  string
-	SrcUUID    string `json:"srcUUID"`
-	SrcEthName string `json:"srcEthName"`
-	DstUUID    string `json:"dstUUID"`
-	DstEthName string `json:"dstEthName"`
+	SessionID   string
+	SrcTunnelID string
+	DstTunnelID string
+	SrcUUID     string `json:"srcUUID"`
+	SrcEthName  string `json:"srcEthName"`
+	DstUUID     string `json:"dstUUID"`
+	DstEthName  string `json:"dstEthName"`
 }
 
-func NewL2TP_SESSION_ID(inputMsg []byte) *L2TP_SESSION_ID {
-	msg := &L2TP_SESSION_ID{}
-	msg.AbstractMessage.MessageType = "L2TP_SESSION_ID"
+func NewL2TP_INFO(inputMsg []byte) *L2TP_INFO {
+	msg := &L2TP_INFO{}
+	msg.AbstractMessage.MessageType = "L2TP_INFO"
 
 	//具象的パラメータをmsgに追加
-	var ev L2TP_SESSION_ID
+	var ev L2TP_INFO
 	json.Unmarshal(inputMsg, &ev)
 	msg.SrcUUID = ev.SrcUUID
 	msg.SrcEthName = ev.SrcEthName
@@ -27,42 +29,58 @@ func NewL2TP_SESSION_ID(inputMsg []byte) *L2TP_SESSION_ID {
 	return msg
 }
 
-func (msg *L2TP_SESSION_ID) SetSessionID(SessionID string) {
+func (msg *L2TP_INFO) SetSessionID(SessionID string) {
 	msg.SessionID = SessionID
 }
 
-func (msg *L2TP_SESSION_ID) GetSessionID() string {
+func (msg *L2TP_INFO) GetSessionID() string {
 	return msg.SessionID
 }
 
-func (msg *L2TP_SESSION_ID) SetSrcUUID(SrcUUID string) {
+func (msg *L2TP_INFO) SetSrcTunnelID(SrcTunnelID string) {
+	msg.SrcTunnelID = SrcTunnelID
+}
+
+func (msg *L2TP_INFO) GetSrcTunnelID() string {
+	return msg.SrcTunnelID
+}
+
+func (msg *L2TP_INFO) SetDstTunnelID(DstTunnelID string) {
+	msg.DstTunnelID = DstTunnelID
+}
+
+func (msg *L2TP_INFO) GetDstTunnelID() string {
+	return msg.DstTunnelID
+}
+
+func (msg *L2TP_INFO) SetSrcUUID(SrcUUID string) {
 	msg.SrcUUID = SrcUUID
 }
 
-func (msg *L2TP_SESSION_ID) GetSrcUUID() string {
+func (msg *L2TP_INFO) GetSrcUUID() string {
 	return msg.SrcUUID
 }
 
-func (msg *L2TP_SESSION_ID) SetSrcEthName(SrcEthName string) {
+func (msg *L2TP_INFO) SetSrcEthName(SrcEthName string) {
 	msg.SrcEthName = SrcEthName
 }
 
-func (msg *L2TP_SESSION_ID) GetSrcEthName() string {
+func (msg *L2TP_INFO) GetSrcEthName() string {
 	return msg.SrcEthName
 }
 
-func (msg *L2TP_SESSION_ID) SetDstUUID(DstUUID string) {
+func (msg *L2TP_INFO) SetDstUUID(DstUUID string) {
 	msg.SrcUUID = DstUUID
 }
 
-func (msg *L2TP_SESSION_ID) GetDstUUID() string {
+func (msg *L2TP_INFO) GetDstUUID() string {
 	return msg.DstUUID
 }
 
-func (msg *L2TP_SESSION_ID) SetDstEthName(DstEthName string) {
+func (msg *L2TP_INFO) SetDstEthName(DstEthName string) {
 	msg.DstEthName = DstEthName
 }
 
-func (msg *L2TP_SESSION_ID) GetDstEthName() string {
+func (msg *L2TP_INFO) GetDstEthName() string {
 	return msg.DstEthName
 }

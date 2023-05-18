@@ -36,13 +36,16 @@ func HandleMessage(ws *websocket.Conn, msg string) {
 	switch messageType.MessageType {
 	case "LAUNCH_NETWORK":
 		break
-	case "L2TP_SESSION_ID_REQUEST":
-		fmt.Println("L2TP_SESSION_ID_REQUESTが届きました")
-		result := l2tpData.GenerateSessionID()
-		session := message.NewL2TP_SESSION_ID(inputMsg)
-		session.SetSessionID(strconv.Itoa(result))
+	case "L2TP_INFO_REQUEST":
+		fmt.Println("L2TP_INFO_REQUESTが届きました")
+		sessionID := l2tpData.GenerateSessionID()
+		tunnelID := l2tpData.GenerateTunnelID()
+		l2tpMsg := message.NewL2TP_INFO(inputMsg)
+		l2tpMsg.SetSessionID(strconv.Itoa(sessionID))
+		l2tpMsg.SetSrcTunnelID(strconv.Itoa(tunnelID))
+		l2tpMsg.SetDstTunnelID(strconv.Itoa(tunnelID + 1))
 
-		jsonData, err := json.Marshal(session)
+		jsonData, err := json.Marshal(l2tpMsg)
 		if err != nil {
 			fmt.Println("JSON変換エラー:", err)
 			return
