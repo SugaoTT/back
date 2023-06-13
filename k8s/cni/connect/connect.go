@@ -322,6 +322,7 @@ func cmdDel(args *skel.CmdArgs) error {
 			exec.Command("sudo", "ip", "link", "del", "veth-"+ev.PodName+"-"+interfaces[i].Name, "type", "veth", "peer", "name", "veth-"+interfaces[i].TargetPodName+"-"+interfaces[i].TargetPodNIC).Output()
 		} else { //接続する2つの機器が別のノード上で稼働する場合
 			//後片付け処理
+			exec.Command("sudo", "ip", "l2tp", "del", "tunnel", "tunnel_id", interfaces[i].SelfTunnelID).Output()
 			exec.Command("sudo", "ip", "l2tp", "del", "session", "tunnel_id", interfaces[i].SelfTunnelID, "session_id", interfaces[i].SessionID).Output()
 		}
 	}

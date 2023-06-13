@@ -1,4 +1,4 @@
-package message
+package abstractMessage
 
 type AbstractMessage struct {
 	MessageType string

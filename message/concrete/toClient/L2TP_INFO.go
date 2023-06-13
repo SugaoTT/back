@@ -1,11 +1,11 @@
-package message
+package messageToClient
 
 import (
-	"encoding/json"
+	abstractmessage "github.com/SugaoTT/back/message"
 )
 
 type L2TP_INFO struct {
-	AbstractMessage
+	abstractmessage.AbstractMessage
 	SessionID   string
 	SrcTunnelID string
 	DstTunnelID string
@@ -15,17 +15,17 @@ type L2TP_INFO struct {
 	DstEthName  string `json:"dstEthName"`
 }
 
-func NewL2TP_INFO(inputMsg []byte) *L2TP_INFO {
+func NewL2TP_INFO() *L2TP_INFO {
 	msg := &L2TP_INFO{}
 	msg.AbstractMessage.MessageType = "L2TP_INFO"
 
-	//具象的パラメータをmsgに追加
+	/*//具象的パラメータをmsgに追加
 	var ev L2TP_INFO
 	json.Unmarshal(inputMsg, &ev)
 	msg.SrcUUID = ev.SrcUUID
 	msg.SrcEthName = ev.SrcEthName
 	msg.DstUUID = ev.DstUUID
-	msg.DstEthName = ev.DstEthName
+	msg.DstEthName = ev.DstEthName*/
 	return msg
 }
 
@@ -70,7 +70,7 @@ func (msg *L2TP_INFO) GetSrcEthName() string {
 }
 
 func (msg *L2TP_INFO) SetDstUUID(DstUUID string) {
-	msg.SrcUUID = DstUUID
+	msg.DstUUID = DstUUID
 }
 
 func (msg *L2TP_INFO) GetDstUUID() string {

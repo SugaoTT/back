@@ -1,7 +1,11 @@
-package message
+package messageToClient
+
+import (
+	abstractmessage "github.com/SugaoTT/back/message"
+)
 
 type L2TP_TUNNEL_ID struct {
-	AbstractMessage
+	abstractmessage.AbstractMessage
 	TunnelID string
 }
 

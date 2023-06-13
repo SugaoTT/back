@@ -47,7 +47,7 @@ func Pod_exec(ws *websocket.Conn, outputCommand []string) {
 	}()
 
 	//Podにexecしてコマンド発行処理を実施
-	err := ExecInPod(config, &stdout, &stderr, "default", "h1", outputCommand, &isCommandComplate)
+	err := ExecInPod(config, &stdout, &stderr, "default", "h1a", outputCommand, &isCommandComplate)
 	if err != nil {
 		//いい感じにエラー処理(print)を記述
 	}

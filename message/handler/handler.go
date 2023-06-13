@@ -10,7 +10,9 @@ import (
 
 	k8s "github.com/SugaoTT/back/k8s"
 	l2tpData "github.com/SugaoTT/back/manager"
-	message "github.com/SugaoTT/back/message/concrete/toClient"
+	messageFromClient "github.com/SugaoTT/back/message/concrete/fromClient"
+	messageToClient "github.com/SugaoTT/back/message/concrete/toClient"
+	//abstractMessage "github.com/SugaoTT/back/message"
 )
 
 type MessageType struct {
@@ -25,40 +27,26 @@ type ConsoleMessage struct {
 
 /** 受け取ったメッセージに応じた処理を実施 */
 func HandleMessage(ws *websocket.Conn, msg string) {
-	inputMsg := []byte(msg)
+	//inputMsg := []byte(msg)
 
 	fmt.Println(msg)
 
 	var messageType MessageType
-	json.Unmarshal(inputMsg, &messageType)
+	json.Unmarshal([]byte(msg), &messageType)
 
-	fmt.Println(messageType.MessageType)
+	fmt.Println("メッセージのタイプ: " + messageType.MessageType)
 	switch messageType.MessageType {
-	case "LAUNCH_NETWORK":
+	case "LAUNCH_NETWORK_REQUEST":
+		fmt.Println("LAUNCH_NETWORK_REQUESTが届きました")
+		LAUNCH_NETWORK_REQUEST(ws, []byte(msg))
 		break
 	case "L2TP_INFO_REQUEST":
 		fmt.Println("L2TP_INFO_REQUESTが届きました")
-		sessionID := l2tpData.GenerateSessionID()
-		tunnelID := l2tpData.GenerateTunnelID()
-		l2tpMsg := message.NewL2TP_INFO(inputMsg)
-		l2tpMsg.SetSessionID(strconv.Itoa(sessionID))
-		l2tpMsg.SetSrcTunnelID(strconv.Itoa(tunnelID))
-		l2tpMsg.SetDstTunnelID(strconv.Itoa(tunnelID + 1))
-
-		jsonData, err := json.Marshal(l2tpMsg)
-		if err != nil {
-			fmt.Println("JSON変換エラー:", err)
-			return
-		}
-
-		// JSONデータを文字列として表示
-		fmt.Println("sendToClient-JSON: " + string(jsonData))
-
-		websocket.Message.Send(ws, string(jsonData))
+		L2TP_INFO_REQUEST(ws, []byte(msg))
 
 		break
 	case "L2TP_TUNNEL_ID_REQUEST":
-		fmt.Println("L2TP_TUNNEL_ID_REQUESTが届きました")
+		/*fmt.Println("L2TP_TUNNEL_ID_REQUESTが届きました")
 		result := l2tpData.GenerateTunnelID()
 
 		tunnel := message.NewL2TP_TUNNEL_ID()
@@ -73,11 +61,11 @@ func HandleMessage(ws *websocket.Conn, msg string) {
 		// JSONデータを文字列として表示
 		fmt.Println(string(jsonData))
 
-		websocket.Message.Send(ws, string(jsonData))
+		websocket.Message.Send(ws, string(jsonData))*/
 		break
 	case "console":
 		var consoleMessage ConsoleMessage
-		json.Unmarshal(inputMsg, &consoleMessage)
+		json.Unmarshal([]byte(msg), &consoleMessage)
 		fmt.Println(consoleMessage.TargetUUID)
 
 		outputCommand := strings.Split(consoleMessage.Content, " ")
@@ -86,4 +74,104 @@ func HandleMessage(ws *websocket.Conn, msg string) {
 
 		break
 	}
+}
+
+func LAUNCH_NETWORK_REQUEST(ws *websocket.Conn, msg []byte) {
+
+	/* ネットワークトポロジに関する構造体 */
+	type Items struct {
+		Name           string `json:"name"`
+		TargetPodName  string `json:"target-pod-name"`
+		TargetPodNic   string `json:"target-pod-nic"`
+		SelfTunnelID   string `json:"self-tunnel-id"`
+		TargetTunnelID string `json:"target-tunnel-id"`
+		SessionID      string `json:"session-id"`
+	}
+
+	type Interface struct {
+		Items []Items `json:"items"`
+	}
+
+	type NetworkTopology struct {
+		PodName   string    `json:"pod-name"`
+		PodType   string    `json:"pod-type"`
+		Interface Interface `json:"interface"`
+	}
+
+	//fromClientのmsgを作成
+	msgOf_LAUNCH_NETWORK_REQUEST := messageFromClient.NewLAUNCH_NETWORK_REQUEST(msg)
+	fmt.Println(msgOf_LAUNCH_NETWORK_REQUEST)
+
+	fmt.Println("net: " + msgOf_LAUNCH_NETWORK_REQUEST.GetNetworkTopology())
+
+	var ev NetworkTopology
+	json.Unmarshal([]byte(msgOf_LAUNCH_NETWORK_REQUEST.GetNetworkTopology()), &ev)
+
+	//ネットワークトポロジが受け取れたので，これを用いてk8sに発行するためのマニフェストを作成する
+
+	k8s.Pod_apply(msgOf_LAUNCH_NETWORK_REQUEST)
+
+	//toClientのmsgを作成
+	msgOf_LAUNCH_NETWORK := messageToClient.NewLAUNCH_NETWORK()
+
+	jsonData, err := json.Marshal(msgOf_LAUNCH_NETWORK)
+	if err != nil {
+		fmt.Println("JSON変換エラー:", err)
+		return
+	}
+
+	fmt.Println(strings.Replace(string(jsonData), "\"", "", -1))
+
+	// JSONデータを文字列として表示
+	fmt.Println("sendToClient-JSON: " + string(jsonData))
+}
+
+func L2TP_INFO_REQUEST(ws *websocket.Conn, msg []byte) {
+
+	//fromClientのmsgを作成
+	msgOf_L2TP_INFO_REQUEST := messageFromClient.NewL2TP_INFO_REQUEST(msg)
+
+	//fmt.Println(msgOf_L2TP_INFO_REQUEST)
+
+	//l2tpに関する情報を生成
+	sessionID := l2tpData.GenerateSessionID()
+	tunnelID := l2tpData.GenerateTunnelID()
+
+	//toClientのmsgを作成
+	msgOf_L2TP_INFO := messageToClient.NewL2TP_INFO()
+	msgOf_L2TP_INFO.SetSrcUUID(msgOf_L2TP_INFO_REQUEST.SrcUUID)
+	msgOf_L2TP_INFO.SetSrcEthName(msgOf_L2TP_INFO_REQUEST.SrcEthName)
+	msgOf_L2TP_INFO.SetDstUUID(msgOf_L2TP_INFO_REQUEST.DstUUID)
+	msgOf_L2TP_INFO.SetDstEthName(msgOf_L2TP_INFO_REQUEST.DstEthName)
+
+	msgOf_L2TP_INFO.SetSessionID(strconv.Itoa(sessionID))
+	msgOf_L2TP_INFO.SetSrcTunnelID(strconv.Itoa(tunnelID))
+	msgOf_L2TP_INFO.SetDstTunnelID(strconv.Itoa(tunnelID + 1))
+
+	jsonData, err := json.Marshal(msgOf_L2TP_INFO)
+	if err != nil {
+		fmt.Println("JSON変換エラー:", err)
+		return
+	}
+	// JSONデータを文字列として表示
+	fmt.Println("sendToClient-JSON: " + string(jsonData))
+
+	/*
+
+		//l2tpMsg := message.NewL2TP_INFO(msg)
+		l2tpMsg.SetSessionID(strconv.Itoa(sessionID))
+		l2tpMsg.SetSrcTunnelID(strconv.Itoa(tunnelID))
+		l2tpMsg.SetDstTunnelID(strconv.Itoa(tunnelID + 1))
+
+		jsonData, err := json.Marshal(l2tpMsg)
+		if err != nil {
+			fmt.Println("JSON変換エラー:", err)
+			return
+		}
+
+		// JSONデータを文字列として表示
+		fmt.Println("sendToClient-JSON: " + string(jsonData))
+	*/
+
+	websocket.Message.Send(ws, string(jsonData))
 }
