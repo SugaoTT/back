@@ -155,9 +155,10 @@ func cmdAdd(args *skel.CmdArgs) error {
 		//仮想機器が稼働するノードに応じた処理を実行
 		if string(selfNode) == string(targetNode) { //接続する2つの機器が同じノード上で稼働する場合
 			//接続処理
-			exec.Command("sudo", "ip", "link", "add", "veth-"+ev.PodName+"-"+interfaces[i].Name, "type", "veth", "peer", "name", "veth-"+interfaces[i].TargetPodName+"-"+interfaces[i].TargetPodNIC).Output()
-			exec.Command("sudo", "brctl", "addif", ev.PodName+"-"+interfaces[i].Name, "veth-"+ev.PodName+"-"+interfaces[i].Name).Output()
-			exec.Command("sudo", "ip", "link", "set", "veth-"+ev.PodName+"-"+interfaces[i].Name, "up").Output()
+			//veth-<name>-net<number>にすると文字数超過するので，v-の形に変更(20230620)
+			exec.Command("sudo", "ip", "link", "add", "v-"+ev.PodName+"-"+interfaces[i].Name, "type", "veth", "peer", "name", "v-"+interfaces[i].TargetPodName+"-"+interfaces[i].TargetPodNIC).Output()
+			exec.Command("sudo", "brctl", "addif", ev.PodName+"-"+interfaces[i].Name, "v-"+ev.PodName+"-"+interfaces[i].Name).Output()
+			exec.Command("sudo", "ip", "link", "set", "v-"+ev.PodName+"-"+interfaces[i].Name, "up").Output()
 		} else { //接続する2つの機器が別のノード上で稼働する場合
 			//自身の機器が稼働するノードのIPアドレスを取得
 			selfNodeIP, _ := exec.Command("ssh", "-i", "/home/ubuntu/.ssh/id_ed25519", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "ubuntu@192.168.0.224", "kubectl", "get", "node", "-o", "wide", "|", "grep", "-w", string(selfNode), "|", "awk", "'{print $6}'").Output()
@@ -319,7 +320,7 @@ func cmdDel(args *skel.CmdArgs) error {
 		if string(selfNode) == string(ev2[i].TargetNode) { //接続する2つの機器が同じノード上で稼働する場合
 			//後片付け処理
 			exec.Command("sudo", "ip", "link", "set", "veth-"+ev.PodName+"-"+interfaces[i].Name, "down").Output()
-			exec.Command("sudo", "ip", "link", "del", "veth-"+ev.PodName+"-"+interfaces[i].Name, "type", "veth", "peer", "name", "veth-"+interfaces[i].TargetPodName+"-"+interfaces[i].TargetPodNIC).Output()
+			exec.Command("sudo", "ip", "link", "del", "v-"+ev.PodName+"-"+interfaces[i].Name, "type", "veth", "peer", "name", "v-"+interfaces[i].TargetPodName+"-"+interfaces[i].TargetPodNIC).Output()
 		} else { //接続する2つの機器が別のノード上で稼働する場合
 			//後片付け処理
 			exec.Command("sudo", "ip", "l2tp", "del", "tunnel", "tunnel_id", interfaces[i].SelfTunnelID).Output()

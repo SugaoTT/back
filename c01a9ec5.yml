@@ -1,0 +1,155 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-c01a9ec5
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "c01a9ec5",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "8de24ee7",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "5",
+            "target-tunnel-id": "4",
+            "session-id": "2"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "a33d53ed",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "6",
+            "target-tunnel-id": "7",
+            "session-id": "3"
+          },
+          {
+            "name": "net3",
+            "target-pod-name": "2b288fa2",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "8",
+            "target-tunnel-id": "9",
+            "session-id": "4"
+          },
+          {
+            "name": "net4",
+            "target-pod-name": "5252d666",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "10",
+            "target-tunnel-id": "11",
+            "session-id": "5"
+          },
+          {
+            "name": "net5",
+            "target-pod-name": "befc1446",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "12",
+            "target-tunnel-id": "13",
+            "session-id": "6"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: c01a9ec5-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "c01a9ec5-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: c01a9ec5-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "c01a9ec5-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: c01a9ec5-net3
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "c01a9ec5-net3",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: c01a9ec5-net4
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "c01a9ec5-net4",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: c01a9ec5-net5
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "c01a9ec5-net5",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: c01a9ec5
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "c01a9ec5-net1"},
+      {"name": "c01a9ec5-net2"},
+      {"name": "c01a9ec5-net3"},
+      {"name": "c01a9ec5-net4"},
+      {"name": "c01a9ec5-net5"},
+      {"name": "connect-c01a9ec5"}
+    ]'
+spec: 
+  containers:
+  - name: c01a9ec5
+    image: openshift/openvswitch:v3.9.0
+    command:
+    - /sbin/init
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "/usr/share/openvswitch/scripts/ovs-ctl start;ip link set eth0 down;ovs-vsctl add-br c01a9ec5;ovs-vsctl add-port c01a9ec5 net1;ovs-vsctl add-port c01a9ec5 net2;ovs-vsctl add-port c01a9ec5 net3;ovs-vsctl add-port c01a9ec5 net4;ovs-vsctl add-port c01a9ec5 net5"

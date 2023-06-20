@@ -63,6 +63,9 @@ func HandleMessage(ws *websocket.Conn, msg string) {
 
 		websocket.Message.Send(ws, string(jsonData))*/
 		break
+	case "REMOVE_NETWORK_REQUEST":
+		REMOVE_NETWORK_REQUEST(ws, []byte(msg))
+		break
 	case "console":
 		var consoleMessage ConsoleMessage
 		json.Unmarshal([]byte(msg), &consoleMessage)
@@ -70,7 +73,7 @@ func HandleMessage(ws *websocket.Conn, msg string) {
 
 		outputCommand := strings.Split(consoleMessage.Content, " ")
 		//fmt.Println(len(outputCommand))
-		k8s.Pod_exec(ws, outputCommand)
+		k8s.Pod_exec(ws, outputCommand, consoleMessage.TargetUUID)
 
 		break
 	}
@@ -174,4 +177,35 @@ func L2TP_INFO_REQUEST(ws *websocket.Conn, msg []byte) {
 	*/
 
 	websocket.Message.Send(ws, string(jsonData))
+}
+
+func REMOVE_NETWORK_REQUEST(ws *websocket.Conn, msg []byte) {
+	fmt.Println("REMOVE_NETWORK_REQUESTが呼び出されました")
+	/* ネットワークトポロジに関する構造体 */
+	type Items struct {
+		Name string `json:"name"`
+	}
+
+	type Pod struct {
+		Items []Items `json:"items"`
+	}
+
+	type NetworkTopology struct {
+		Interface Pod `json:"pod"`
+	}
+
+	//fromClientのmsgを作成
+	msgOf_REMOVE_NETWORK_REQUEST := messageFromClient.NewLAUNCH_NETWORK_REQUEST(msg)
+
+	var ev NetworkTopology
+	json.Unmarshal([]byte(msgOf_REMOVE_NETWORK_REQUEST.GetNetworkTopology()), &ev)
+
+	fmt.Println(ev.Interface.Items)
+	i := 0
+
+	//ここから削除処理をする
+	for ; i < len(ev.Interface.Items); i++ {
+		//fmt.Println(ev.Interface.Items[i].Name)
+		k8s.Pod_delete(ev.Interface.Items[i].Name)
+	}
 }

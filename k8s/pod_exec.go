@@ -17,7 +17,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func Pod_exec(ws *websocket.Conn, outputCommand []string) {
+func Pod_exec(ws *websocket.Conn, outputCommand []string, uuid string) {
+	uuidPrefix := uuid[:8]
 	// Kubeconfigのファイルパスを指定
 	kubeconfig := filepath.Join("/Users", "sugaott", "school", "study", "code", "k8s", "kubectl", "config")
 	config, _ := clientcmd.BuildConfigFromFlags("", kubeconfig)
@@ -47,7 +48,7 @@ func Pod_exec(ws *websocket.Conn, outputCommand []string) {
 	}()
 
 	//Podにexecしてコマンド発行処理を実施
-	err := ExecInPod(config, &stdout, &stderr, "default", "h1a", outputCommand, &isCommandComplate)
+	err := ExecInPod(config, &stdout, &stderr, "default", uuidPrefix, outputCommand, &isCommandComplate)
 	if err != nil {
 		//いい感じにエラー処理(print)を記述
 	}
