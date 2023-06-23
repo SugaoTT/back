@@ -4,21 +4,21 @@ import (
 	abstractmessage "github.com/SugaoTT/back/message"
 )
 
-type LAUNCH_NETWORK struct {
+type LAUNCH_NETWORK_SUCCESS struct {
 	abstractmessage.AbstractMessage
 	NetworkTopology string
 }
 
-func NewLAUNCH_NETWORK() *LAUNCH_NETWORK {
-	msg := &LAUNCH_NETWORK{}
-	msg.AbstractMessage.MessageType = "LAUNCH_NETWORK"
+func NewLAUNCH_NETWORK_SUCCESS() *LAUNCH_NETWORK_SUCCESS {
+	msg := &LAUNCH_NETWORK_SUCCESS{}
+	msg.AbstractMessage.MessageType = "LAUNCH_NETWORK_SUCCESS"
 	return msg
 }
 
-func (msg *LAUNCH_NETWORK) SetNetworkTopology(networkTopology string) {
+func (msg *LAUNCH_NETWORK_SUCCESS) SetNetworkTopology(networkTopology string) {
 	msg.NetworkTopology = networkTopology
 }
 
-func (msg *LAUNCH_NETWORK) GetNetworkTopology() string {
+func (msg *LAUNCH_NETWORK_SUCCESS) GetNetworkTopology() string {
 	return msg.NetworkTopology
 }

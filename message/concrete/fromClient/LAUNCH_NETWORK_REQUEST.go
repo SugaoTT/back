@@ -2,13 +2,14 @@ package messageFromClient
 
 import (
 	"encoding/json"
+	"fmt"
 
 	abstractmessage "github.com/SugaoTT/back/message"
 )
 
 type LAUNCH_NETWORK_REQUEST struct {
 	abstractmessage.AbstractMessage
-	NetworkTopology string
+	NetworkTopologies string
 }
 
 type Items struct {
@@ -30,14 +31,39 @@ type NetworkTopology struct {
 	Interface Interface `json:"interface"`
 }
 
+// NetworkTopology のスライスを保持する新しい構造体
+type NetworkTopologies struct {
+	PodList []NetworkTopology `json:"podList"`
+}
+
+type OuterRequest struct {
+	MessageType     string `json:"messageType"`
+	NetworkTopology string `json:"networkTopology"` // 注意: これはJSON文字列として格納されています
+}
+
 func NewLAUNCH_NETWORK_REQUEST(inputMsg []byte) *LAUNCH_NETWORK_REQUEST {
 	msg := &LAUNCH_NETWORK_REQUEST{}
 	msg.AbstractMessage.MessageType = "LAUNCH_NETWORK_REQUEST"
 
-	//具象的パラメータをmsgに追加
-	var ev LAUNCH_NETWORK_REQUEST
-	json.Unmarshal(inputMsg, &ev)
-	msg.NetworkTopology = ev.NetworkTopology
+	fmt.Println(inputMsg)
+
+	var outerRequest OuterRequest
+	json.Unmarshal([]byte(inputMsg), &outerRequest)
+
+	var ev NetworkTopologies
+	json.Unmarshal([]byte(outerRequest.NetworkTopology), &ev)
+
+	fmt.Println("ev.PodList:")
+	fmt.Println(ev.PodList)
+
+	msg.NetworkTopologies = outerRequest.NetworkTopology
+
+	// //具象的パラメータをmsgに追加
+	// var ev LAUNCH_NETWORK_REQUEST
+	// json.Unmarshal(inputMsg, &ev)
+	// msg.NetworkTopologies = ev.NetworkTopologies
+
+	// fmt.Println("ev.NetworkTopologies: " + ev.NetworkTopologies)
 
 	//ここでデコードとかしてしまおう
 
@@ -50,10 +76,10 @@ func NewLAUNCH_NETWORK_REQUEST(inputMsg []byte) *LAUNCH_NETWORK_REQUEST {
 	return msg
 }
 
-func (msg *LAUNCH_NETWORK_REQUEST) SetNetworkTopology(networkTopology string) {
-	msg.NetworkTopology = networkTopology
+func (msg *LAUNCH_NETWORK_REQUEST) SetNetworkTopologies(networkTopologies string) {
+	msg.NetworkTopologies = networkTopologies
 }
 
-func (msg *LAUNCH_NETWORK_REQUEST) GetNetworkTopology() string {
-	return msg.NetworkTopology
+func (msg *LAUNCH_NETWORK_REQUEST) GetNetworkTopologies() string {
+	return msg.NetworkTopologies
 }

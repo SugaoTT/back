@@ -9,11 +9,10 @@ import (
 	"text/template"
 
 	"io/ioutil"
-
-	messageFromClient "github.com/SugaoTT/back/message/concrete/fromClient"
+	//handler "github.com/SugaoTT/back/message/handler"
 )
 
-func Pod_apply(msgOf_LAUNCH_NETWORK_REQUEST *messageFromClient.LAUNCH_NETWORK_REQUEST) {
+func Pod_apply(inputJson string) {
 
 	/* ネットワークトポロジに関する構造体 */
 	type Items struct {
@@ -36,7 +35,7 @@ func Pod_apply(msgOf_LAUNCH_NETWORK_REQUEST *messageFromClient.LAUNCH_NETWORK_RE
 	}
 
 	var ev NetworkTopology
-	json.Unmarshal([]byte(msgOf_LAUNCH_NETWORK_REQUEST.GetNetworkTopology()), &ev)
+	json.Unmarshal([]byte(inputJson), &ev)
 
 	// Pod 名とコンテナイメージを設定する変数
 	//containerImage := "frrouting/frr:v8.1.0"
@@ -137,8 +136,6 @@ spec:
   containers:
   - name: {{ .Name }}
     image: frrouting/frr:v8.1.0
-    command:
-    - /sbin/init
     securityContext:
       privileged: true
     lifecycle:
@@ -217,7 +214,7 @@ spec:
 
 	fmt.Println(string(yamlBuffer.Bytes()))
 
-	// kubectl コマンドを実行する
+	//kubectl コマンドを実行する
 	cmd := exec.Command("kubectl", "apply", "-f", "-")
 	cmd.Stdin = &yamlBuffer
 	output, err := cmd.CombinedOutput()

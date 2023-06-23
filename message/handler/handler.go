@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/net/websocket"
 
@@ -101,23 +102,50 @@ func LAUNCH_NETWORK_REQUEST(ws *websocket.Conn, msg []byte) {
 		Interface Interface `json:"interface"`
 	}
 
+	// NetworkTopology のスライスを保持する新しい構造体
+	type NetworkTopologies struct {
+		PodList []NetworkTopology `json:"podList"`
+	}
+
 	//fromClientのmsgを作成
 	msgOf_LAUNCH_NETWORK_REQUEST := messageFromClient.NewLAUNCH_NETWORK_REQUEST(msg)
 	fmt.Println(msgOf_LAUNCH_NETWORK_REQUEST)
 
-	fmt.Println("net: " + msgOf_LAUNCH_NETWORK_REQUEST.GetNetworkTopology())
+	//fmt.Println("net: " + msgOf_LAUNCH_NETWORK_REQUEST.GetNetworkTopologies())
 
-	var ev NetworkTopology
-	json.Unmarshal([]byte(msgOf_LAUNCH_NETWORK_REQUEST.GetNetworkTopology()), &ev)
+	var ev NetworkTopologies
+	json.Unmarshal([]byte(msgOf_LAUNCH_NETWORK_REQUEST.GetNetworkTopologies()), &ev)
+
+	fmt.Println(ev.PodList)
+
+	for _, networkTopology := range ev.PodList {
+		fmt.Println(networkTopology.PodType)
+		var json, _ = json.Marshal(networkTopology)
+		k8s.Pod_apply(string(json))
+	}
 
 	//ネットワークトポロジが受け取れたので，これを用いてk8sに発行するためのマニフェストを作成する
 
-	k8s.Pod_apply(msgOf_LAUNCH_NETWORK_REQUEST)
+	//k8s.Pod_apply(msgOf_LAUNCH_NETWORK_REQUEST)
+
+	//time.Sleep(5000 * time.Millisecond)
+
+	for _, networkTopology := range ev.PodList {
+		status := k8s.Chack_Status(networkTopology.PodName[:8])
+		if status {
+			continue
+		}
+
+		for !status {
+			time.Sleep(time.Millisecond * 500)
+			status = k8s.Chack_Status(networkTopology.PodName[:8])
+		}
+	}
 
 	//toClientのmsgを作成
-	msgOf_LAUNCH_NETWORK := messageToClient.NewLAUNCH_NETWORK()
+	msgOf_LAUNCH_NETWORK_SUCCESS := messageToClient.NewLAUNCH_NETWORK_SUCCESS()
 
-	jsonData, err := json.Marshal(msgOf_LAUNCH_NETWORK)
+	jsonData, err := json.Marshal(msgOf_LAUNCH_NETWORK_SUCCESS)
 	if err != nil {
 		fmt.Println("JSON変換エラー:", err)
 		return
@@ -127,6 +155,8 @@ func LAUNCH_NETWORK_REQUEST(ws *websocket.Conn, msg []byte) {
 
 	// JSONデータを文字列として表示
 	fmt.Println("sendToClient-JSON: " + string(jsonData))
+
+	websocket.Message.Send(ws, string(jsonData))
 }
 
 func L2TP_INFO_REQUEST(ws *websocket.Conn, msg []byte) {
@@ -195,7 +225,7 @@ func REMOVE_NETWORK_REQUEST(ws *websocket.Conn, msg []byte) {
 	}
 
 	//fromClientのmsgを作成
-	msgOf_REMOVE_NETWORK_REQUEST := messageFromClient.NewLAUNCH_NETWORK_REQUEST(msg)
+	msgOf_REMOVE_NETWORK_REQUEST := messageFromClient.NewREMOVE_NETWORK_REQUEST(msg)
 
 	var ev NetworkTopology
 	json.Unmarshal([]byte(msgOf_REMOVE_NETWORK_REQUEST.GetNetworkTopology()), &ev)

@@ -1,0 +1,38 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-edcb5b3c
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "edcb5b3c",
+      "interface": {
+        "items": [
+        ]
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: edcb5b3c
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "connect-edcb5b3c"}
+    ]'
+spec: 
+  containers:
+  - name: edcb5b3c
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"
