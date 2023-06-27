@@ -26,6 +26,7 @@ func Chack_Status(uuid string) bool {
 	//podName := "r1"        // replace with your pod name
 	namespace := "default" // replace with your namespace
 
+	//@TODO: podがnot foundの時になんかk8sの調子が悪くなる
 	pod, err := clientset.CoreV1().Pods(namespace).Get(context.TODO(), uuid, metav1.GetOptions{})
 	if err != nil {
 		panic(err.Error())

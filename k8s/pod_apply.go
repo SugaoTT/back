@@ -133,6 +133,7 @@ metadata:
 
 		yamlTemplate += `
 spec: 
+  nodeName: sugao-k8s-worker3
   containers:
   - name: {{ .Name }}
     image: frrouting/frr:v8.1.0

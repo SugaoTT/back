@@ -18,6 +18,9 @@ import (
 )
 
 func Pod_exec(ws *websocket.Conn, outputCommand []string, uuid string) {
+
+	defer websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
+
 	uuidPrefix := uuid[:8]
 	// Kubeconfigのファイルパスを指定
 	kubeconfig := filepath.Join("/Users", "sugaott", "school", "study", "code", "k8s", "kubectl", "config")
@@ -55,7 +58,7 @@ func Pod_exec(ws *websocket.Conn, outputCommand []string, uuid string) {
 
 	//goルーチンの最後の処理が終わるまでwait
 	time.Sleep(time.Millisecond * 200)
-	websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
+	//defer websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
 	// if isCommandComplate {
 	// 	websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
 	// }
@@ -63,6 +66,7 @@ func Pod_exec(ws *websocket.Conn, outputCommand []string, uuid string) {
 }
 
 func ExecInPod(config *rest.Config, stdout, stderr *bytes.Buffer, namespace, podName string, outputCommand []string, isCommandComplate *bool) error {
+
 	k8sCli, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return err

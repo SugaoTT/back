@@ -51,7 +51,7 @@ func main() {
 	}()
 
 	//Podにexecしてコマンド発行処理を実施
-	err := ExecInPod(config, &stdout, &stderr, "default", "centos1")
+	err := ExecInPod(config, &stdout, &stderr, "default", "deb27b8e")
 	if err != nil {
 		//いい感じにエラー処理(print)を記述
 	}
@@ -65,10 +65,9 @@ func ExecInPod(config *rest.Config, stdout, stderr *bytes.Buffer, namespace, pod
 
 	//コンテナに発行するコマンド
 	cmd := []string{
-		"ping",
+		"vtysh",
 		"-c",
-		"3",
-		"127.0.0.1",
+		"show interface",
 	}
 
 	const tty = false
@@ -98,6 +97,9 @@ func ExecInPod(config *rest.Config, stdout, stderr *bytes.Buffer, namespace, pod
 		Stdout: stdout,
 		Stderr: stderr,
 	})
+
+	//fmt.Println(stdout)
+
 	if err != nil {
 		return err
 	}

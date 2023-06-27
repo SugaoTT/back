@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -72,9 +73,25 @@ func HandleMessage(ws *websocket.Conn, msg string) {
 		json.Unmarshal([]byte(msg), &consoleMessage)
 		fmt.Println(consoleMessage.TargetUUID)
 
-		outputCommand := strings.Split(consoleMessage.Content, " ")
+		//outputCommand := strings.Split(consoleMessage.Content, " ")
+
+		//str := `vtysh -c "show ip route"`
+
+		// Split by space but respect quoted strings as single element
+		re := regexp.MustCompile(`[^\s"']+|"([^"]*)"|'([^']*)`)
+		outputCommand := re.FindAllString(consoleMessage.Content, -1)
+
+		// Remove quotes from quoted strings
+		for i, part := range outputCommand {
+			if strings.HasPrefix(part, `"`) && strings.HasSuffix(part, `"`) {
+				outputCommand[i] = strings.Trim(part, `"`)
+			}
+		}
+
+		fmt.Println(outputCommand)
+
 		//fmt.Println(len(outputCommand))
-		k8s.Pod_exec(ws, outputCommand, consoleMessage.TargetUUID)
+		k8s.Pod_exec_new(ws, outputCommand, consoleMessage.TargetUUID)
 
 		break
 	}
@@ -128,7 +145,7 @@ func LAUNCH_NETWORK_REQUEST(ws *websocket.Conn, msg []byte) {
 
 	//k8s.Pod_apply(msgOf_LAUNCH_NETWORK_REQUEST)
 
-	//time.Sleep(5000 * time.Millisecond)
+	time.Sleep(5000 * time.Millisecond)
 
 	for _, networkTopology := range ev.PodList {
 		status := k8s.Chack_Status(networkTopology.PodName[:8])

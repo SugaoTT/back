@@ -2,21 +2,21 @@
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: connect-fa9ca025
+  name: connect-873616e8
 spec:
   config: >
     {
       "cniVersion": "0.3.0",
       "type": "connect",
-      "pod-name": "fa9ca025",
+      "pod-name": "873616e8",
       "interface": {
         "items": [
           {
             "name": "net1",
-            "target-pod-name": "ba8caedd",
+            "target-pod-name": "656f4fcb",
             "target-pod-nic": "net1",
-            "self-tunnel-id": "3",
-            "target-tunnel-id": "2",
+            "self-tunnel-id": "2",
+            "target-tunnel-id": "3",
             "session-id": "1"
           }
         ]
@@ -26,13 +26,13 @@ spec:
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: fa9ca025-net1
+  name: 873616e8-net1
 spec:
   config: >
     {
       "cniVersion": "0.3.0",
       "type": "bridge",
-      "bridge": "fa9ca025-net1",
+      "bridge": "873616e8-net1",
       "ipam": {
       }
     }
@@ -40,17 +40,16 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata: 
-  name: fa9ca025
+  name: 873616e8
   annotations:
     k8s.v1.cni.cncf.io/networks: '[
-      {"name": "fa9ca025-net1"},
-      {"name": "connect-fa9ca025"}
+      {"name": "873616e8-net1"},
+      {"name": "connect-873616e8"}
     ]'
 spec: 
   containers:
-  - name: fa9ca025
-    image: sugaott/sugaott-ubuntu-focal:1.4
-    command: ["bash", "-c", "sleep infinity"]
+  - name: 873616e8
+    image: frrouting/frr:v8.1.0
     securityContext:
       privileged: true
     lifecycle:

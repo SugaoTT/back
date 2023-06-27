@@ -2,18 +2,18 @@
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: connect-13522d78
+  name: connect-c26a5c65
 spec:
   config: >
     {
       "cniVersion": "0.3.0",
       "type": "connect",
-      "pod-name": "13522d78",
+      "pod-name": "c26a5c65",
       "interface": {
         "items": [
           {
             "name": "net1",
-            "target-pod-name": "88786e68",
+            "target-pod-name": "004e15b6",
             "target-pod-nic": "net1",
             "self-tunnel-id": "6",
             "target-tunnel-id": "7",
@@ -26,13 +26,13 @@ spec:
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: 13522d78-net1
+  name: c26a5c65-net1
 spec:
   config: >
     {
       "cniVersion": "0.3.0",
       "type": "bridge",
-      "bridge": "13522d78-net1",
+      "bridge": "c26a5c65-net1",
       "ipam": {
       }
     }
@@ -40,15 +40,16 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata: 
-  name: 13522d78
+  name: c26a5c65
   annotations:
     k8s.v1.cni.cncf.io/networks: '[
-      {"name": "13522d78-net1"},
-      {"name": "connect-13522d78"}
+      {"name": "c26a5c65-net1"},
+      {"name": "connect-c26a5c65"}
     ]'
 spec: 
+  nodeName: sugao-k8s-worker2
   containers:
-  - name: 13522d78
+  - name: c26a5c65
     image: frrouting/frr:v8.1.0
     securityContext:
       privileged: true

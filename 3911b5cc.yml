@@ -2,21 +2,21 @@
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: connect-ba8caedd
+  name: connect-3911b5cc
 spec:
   config: >
     {
       "cniVersion": "0.3.0",
       "type": "connect",
-      "pod-name": "ba8caedd",
+      "pod-name": "3911b5cc",
       "interface": {
         "items": [
           {
             "name": "net1",
-            "target-pod-name": "fa9ca025",
+            "target-pod-name": "c7d351ce",
             "target-pod-nic": "net1",
-            "self-tunnel-id": "2",
-            "target-tunnel-id": "3",
+            "self-tunnel-id": "3",
+            "target-tunnel-id": "2",
             "session-id": "1"
           }
         ]
@@ -26,13 +26,13 @@ spec:
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: ba8caedd-net1
+  name: 3911b5cc-net1
 spec:
   config: >
     {
       "cniVersion": "0.3.0",
       "type": "bridge",
-      "bridge": "ba8caedd-net1",
+      "bridge": "3911b5cc-net1",
       "ipam": {
       }
     }
@@ -40,15 +40,15 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata: 
-  name: ba8caedd
+  name: 3911b5cc
   annotations:
     k8s.v1.cni.cncf.io/networks: '[
-      {"name": "ba8caedd-net1"},
-      {"name": "connect-ba8caedd"}
+      {"name": "3911b5cc-net1"},
+      {"name": "connect-3911b5cc"}
     ]'
 spec: 
   containers:
-  - name: ba8caedd
+  - name: 3911b5cc
     image: frrouting/frr:v8.1.0
     securityContext:
       privileged: true
