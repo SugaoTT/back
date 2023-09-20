@@ -1,0 +1,108 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-b30dfb14
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "b30dfb14",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "fd711b7f",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "20",
+            "target-tunnel-id": "21",
+            "session-id": "10"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "d922f41a",
+            "target-pod-nic": "net3",
+            "self-tunnel-id": "39",
+            "target-tunnel-id": "38",
+            "session-id": "19"
+          },
+          {
+            "name": "net3",
+            "target-pod-name": "dbc1042c",
+            "target-pod-nic": "net3",
+            "self-tunnel-id": "42",
+            "target-tunnel-id": "43",
+            "session-id": "21"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: b30dfb14-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "b30dfb14-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: b30dfb14-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "b30dfb14-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: b30dfb14-net3
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "b30dfb14-net3",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: b30dfb14
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "b30dfb14-net1"},
+      {"name": "b30dfb14-net2"},
+      {"name": "b30dfb14-net3"},
+      {"name": "connect-b30dfb14"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: b30dfb14
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

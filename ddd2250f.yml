@@ -1,0 +1,63 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-ddd2250f
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "ddd2250f",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "3d5370c9",
+            "target-pod-nic": "net4",
+            "self-tunnel-id": "31",
+            "target-tunnel-id": "30",
+            "session-id": "15"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: ddd2250f-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "ddd2250f-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: ddd2250f
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "ddd2250f-net1"},
+      {"name": "connect-ddd2250f"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: ddd2250f
+    image: sugaott/sugaott-ubuntu-focal:1.4
+    command: ["bash", "-c", "sleep infinity"]
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

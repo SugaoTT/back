@@ -1,0 +1,108 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-dbc1042c
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "dbc1042c",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "54f93172",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "28",
+            "target-tunnel-id": "29",
+            "session-id": "14"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "8be0772f",
+            "target-pod-nic": "net3",
+            "self-tunnel-id": "41",
+            "target-tunnel-id": "40",
+            "session-id": "20"
+          },
+          {
+            "name": "net3",
+            "target-pod-name": "b30dfb14",
+            "target-pod-nic": "net3",
+            "self-tunnel-id": "43",
+            "target-tunnel-id": "42",
+            "session-id": "21"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: dbc1042c-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "dbc1042c-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: dbc1042c-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "dbc1042c-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: dbc1042c-net3
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "dbc1042c-net3",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: dbc1042c
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "dbc1042c-net1"},
+      {"name": "dbc1042c-net2"},
+      {"name": "dbc1042c-net3"},
+      {"name": "connect-dbc1042c"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: dbc1042c
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

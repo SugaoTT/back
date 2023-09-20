@@ -1,0 +1,64 @@
+// package k8s
+
+// import (
+// 	"fmt"
+// 	"os/exec"
+// 	"strings"
+
+// 	"golang.org/x/net/websocket"
+// )
+
+// type myWriter struct {
+// 	ws *websocket.Conn
+// }
+
+// func (mw *myWriter) Write(p []byte) (n int, err error) {
+// 	myFunction(p) // pを自分の関数に渡す
+// 	websocket.Message.Send(mw.ws, strings.TrimSpace(string(p)))
+// 	return len(p), nil
+// }
+
+// func myFunction(p []byte) {
+// 	// pを処理する
+// 	fmt.Print(string(p))
+// }
+
+// type wsReader struct {
+// 	ws *websocket.Conn
+// }
+
+// func (r *wsReader) Read(p []byte) (n int, err error) {
+// 	err = websocket.Message.Receive(r.ws, &p)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	return len(p), nil
+// }
+
+// func PodExecWithKubectl(ws *websocket.Conn, outputCommand []string, uuid string) {
+
+// 	//uuidPrefix := uuid[:8]
+
+// 	defer websocket.Message.Send(ws, strings.TrimSpace("EXEC COMPLETE"))
+
+// 	//namespace := "default"
+
+// 	cmd := exec.Command("kubectl", "exec", "-it", "klish", "--", "/bin/sh")
+
+// 	// Create kubectl exec command
+// 	//args := append([]string{"exec", "-n", namespace, "klish", "--"}, outputCommand...)
+// 	//cmd := exec.Command("kubectl", args...)
+
+// 	mw := &myWriter{ws: ws}
+// 	wr := &wsReader{ws: ws}
+
+// 	// Set up input/output
+// 	cmd.Stdin = wr
+// 	cmd.Stdout = mw
+// 	cmd.Stderr = mw
+
+// 	// Execute the command
+// 	if err := cmd.Run(); err != nil {
+// 		panic(err)
+// 	}
+// }

@@ -1,0 +1,108 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-8fb76454
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "8fb76454",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "3d5370c9",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "24",
+            "target-tunnel-id": "25",
+            "session-id": "12"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "514947ad",
+            "target-pod-nic": "net3",
+            "self-tunnel-id": "37",
+            "target-tunnel-id": "36",
+            "session-id": "18"
+          },
+          {
+            "name": "net3",
+            "target-pod-name": "c25f6c5c",
+            "target-pod-nic": "net3",
+            "self-tunnel-id": "41",
+            "target-tunnel-id": "40",
+            "session-id": "20"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 8fb76454-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "8fb76454-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 8fb76454-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "8fb76454-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 8fb76454-net3
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "8fb76454-net3",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: 8fb76454
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "8fb76454-net1"},
+      {"name": "8fb76454-net2"},
+      {"name": "8fb76454-net3"},
+      {"name": "connect-8fb76454"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: 8fb76454
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

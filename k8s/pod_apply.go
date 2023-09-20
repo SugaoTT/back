@@ -133,7 +133,7 @@ metadata:
 
 		yamlTemplate += `
 spec: 
-  nodeName: sugao-k8s-worker3
+  nodeName: sugao-k8s-worker2
   containers:
   - name: {{ .Name }}
     image: frrouting/frr:v8.1.0
@@ -150,6 +150,7 @@ spec:
 	case "Switch":
 		yamlTemplate += `
 spec: 
+  nodeName: sugao-k8s-worker2
   containers:
   - name: {{ .Name }}
     image: openshift/openvswitch:v3.9.0
@@ -177,6 +178,7 @@ spec:
 	case "Host":
 		yamlTemplate += `
 spec: 
+  nodeName: sugao-k8s-worker2
   containers:
   - name: {{ .Name }}
     image: sugaott/sugaott-ubuntu-focal:1.4

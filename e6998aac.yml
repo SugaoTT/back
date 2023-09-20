@@ -1,0 +1,39 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-e6998aac
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "e6998aac",
+      "interface": {
+        "items": [
+        ]
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: e6998aac
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "connect-e6998aac"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: e6998aac
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

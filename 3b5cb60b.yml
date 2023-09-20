@@ -1,0 +1,87 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-3b5cb60b
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "3b5cb60b",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "1424ef3f",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "3",
+            "target-tunnel-id": "2",
+            "session-id": "1"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "577a35cb",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "4",
+            "target-tunnel-id": "5",
+            "session-id": "2"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 3b5cb60b-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "3b5cb60b-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 3b5cb60b-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "3b5cb60b-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: 3b5cb60b
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "3b5cb60b-net1"},
+      {"name": "3b5cb60b-net2"},
+      {"name": "connect-3b5cb60b"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: 3b5cb60b
+    image: openshift/openvswitch:v3.9.0
+    command:
+    - /sbin/init
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "/usr/share/openvswitch/scripts/ovs-ctl start;ip link set eth0 down;ovs-vsctl add-br 3b5cb60b;ovs-vsctl add-port 3b5cb60b net1;ovs-vsctl add-port 3b5cb60b net2"

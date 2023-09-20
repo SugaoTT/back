@@ -2,11 +2,14 @@
 
 // import (
 // 	"fmt"
+// 	"os"
 // 	"path/filepath"
+// 	"time"
 
 // 	corev1 "k8s.io/api/core/v1"
 // 	"k8s.io/client-go/kubernetes"
 // 	"k8s.io/client-go/kubernetes/scheme"
+// 	"k8s.io/client-go/rest"
 // 	"k8s.io/client-go/tools/clientcmd"
 // 	"k8s.io/client-go/tools/remotecommand"
 // )
@@ -39,16 +42,24 @@
 // 	podName := "klish"
 // 	namespace := "default"
 
+// 	execCommand(clientset, config, podName, namespace, []string{"bash", "-c", "CLISH_PATH=xml-examples/clish bin/clish --lockless"})
+
+// 	time.Sleep(5 * time.Second)
+
+// 	execCommand(clientset, config, podName, namespace, []string{"ping", "-c", "4", "127.0.0.1"})
+// }
+
+// func execCommand(clientset *kubernetes.Clientset, config *rest.Config, podName string, namespace string, command []string) {
 // 	execReq := clientset.CoreV1().RESTClient().Post().
 // 		Resource("pods").
 // 		Name(podName).
 // 		Namespace(namespace).
 // 		SubResource("exec").
 // 		VersionedParams(&corev1.PodExecOptions{
-// 			Command: []string{"bash", "-c", "CLISH_PATH=xml-examples/clish bin/clish --lockless;help"},
+// 			Command: command,
 // 			Stdout:  true,
 // 			Stderr:  true,
-// 			TTY:     true, // TTYを有効にする
+// 			TTY:     true,
 // 		}, scheme.ParameterCodec)
 
 // 	executor, err := remotecommand.NewSPDYExecutor(config, "POST", execReq.URL())
@@ -58,7 +69,7 @@
 
 // 	mw := &myWriter{}
 // 	err = executor.Stream(remotecommand.StreamOptions{
-// 		Stdout: mw,
+// 		Stdout: os.Stdout,
 // 		Stderr: mw,
 // 	})
 // 	if err != nil {

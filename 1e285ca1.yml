@@ -1,0 +1,85 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-1e285ca1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "1e285ca1",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "23f6d985",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "3",
+            "target-tunnel-id": "2",
+            "session-id": "1"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "d8a5c381",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "4",
+            "target-tunnel-id": "5",
+            "session-id": "2"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 1e285ca1-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "1e285ca1-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 1e285ca1-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "1e285ca1-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: 1e285ca1
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "1e285ca1-net1"},
+      {"name": "1e285ca1-net2"},
+      {"name": "connect-1e285ca1"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: 1e285ca1
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

@@ -1,0 +1,40 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-32ff9407
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "32ff9407",
+      "interface": {
+        "items": [
+        ]
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: 32ff9407
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "connect-32ff9407"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: 32ff9407
+    image: sugaott/sugaott-ubuntu-focal:1.4
+    command: ["bash", "-c", "sleep infinity"]
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

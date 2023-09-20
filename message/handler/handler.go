@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -88,9 +89,13 @@ func HandleMessage(ws *websocket.Conn, msg string) {
 			}
 		}
 
-		fmt.Println(outputCommand)
+		//コマンドがpingの時
+		if outputCommand[0] == "ping" && outputCommand[1] != "-c" {
+			outputCommand = append(outputCommand[:1], append([]string{"-c", "3"}, outputCommand[1:]...)...)
+		}
 
 		//fmt.Println(len(outputCommand))
+		//k8s.Pod_exec_new(ws, outputCommand, consoleMessage.TargetUUID)
 		k8s.Pod_exec_new(ws, outputCommand, consoleMessage.TargetUUID)
 
 		break
@@ -249,10 +254,24 @@ func REMOVE_NETWORK_REQUEST(ws *websocket.Conn, msg []byte) {
 
 	fmt.Println(ev.Interface.Items)
 	i := 0
+	deleteCommand := ""
 
 	//ここから削除処理をする
 	for ; i < len(ev.Interface.Items); i++ {
 		//fmt.Println(ev.Interface.Items[i].Name)
-		k8s.Pod_delete(ev.Interface.Items[i].Name)
+		deleteCommand += "-f " + ev.Interface.Items[i].Name[:8] + ".yml "
+		//k8s.Pod_delete(ev.Interface.Items[i].Name)
 	}
+
+	i = 0
+
+	if deleteCommand != "" {
+		k8s.Pod_delete(deleteCommand)
+	}
+
+	for ; i < len(ev.Interface.Items); i++ {
+		os.Remove(ev.Interface.Items[i].Name[:8] + ".yml")
+	}
+
+	fmt.Println("kubectl", "delete", deleteCommand)
 }
