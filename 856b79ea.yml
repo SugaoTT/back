@@ -1,0 +1,62 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-856b79ea
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "856b79ea",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "f90295d9",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "3",
+            "target-tunnel-id": "2",
+            "session-id": "1"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 856b79ea-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "856b79ea-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: 856b79ea
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "856b79ea-net1"},
+      {"name": "connect-856b79ea"}
+    ]'
+spec: 
+  nodeName: sugao-k8s-worker2
+  containers:
+  - name: 856b79ea
+    image: frrouting/frr:v8.1.0
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "ip link set eth0 down"

@@ -1,0 +1,86 @@
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: connect-74861e98
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "connect",
+      "pod-name": "74861e98",
+      "interface": {
+        "items": [
+          {
+            "name": "net1",
+            "target-pod-name": "9ddd2539",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "7",
+            "target-tunnel-id": "6",
+            "session-id": "3"
+          },
+          {
+            "name": "net2",
+            "target-pod-name": "f98f63ca",
+            "target-pod-nic": "net1",
+            "self-tunnel-id": "10",
+            "target-tunnel-id": "11",
+            "session-id": "5"
+          }
+        ]
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 74861e98-net1
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "74861e98-net1",
+      "ipam": {
+      }
+    }
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: 74861e98-net2
+spec:
+  config: >
+    {
+      "cniVersion": "0.3.0",
+      "type": "bridge",
+      "bridge": "74861e98-net2",
+      "ipam": {
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: 74861e98
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {"name": "74861e98-net1"},
+      {"name": "74861e98-net2"},
+      {"name": "connect-74861e98"}
+    ]'
+spec: 
+  containers:
+  - name: 74861e98
+    image: openshift/openvswitch:v3.9.0
+    command:
+    - /sbin/init
+    securityContext:
+      privileged: true
+    lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -c
+                - "/usr/share/openvswitch/scripts/ovs-ctl start;ip link set eth0 down;ovs-vsctl add-br 74861e98;ovs-vsctl add-port 74861e98 net1;ovs-vsctl add-port 74861e98 net2"

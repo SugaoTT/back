@@ -25,17 +25,18 @@ func main() {
 		panic(err.Error())
 	}
 
-	const sets = 25 // 作成するDeploymentのセット数
-	//const targetNode = "sugao-k8s-worker2" // Podをスケジュールするノードの名前
+	const sets = 85 // 作成するDeploymentのセット数
+	//const targetNode = "sugao-k8s-worker1-n" // Podをスケジュールするノードの名前
 
-	for i := 20; i < sets; i++ {
-		//createDeploymentIOTS_SINGLENODE(clientset, "routers", "frrouting/frr:v8.1.0", i, 4, targetNode)            // コンテナAのデプロイメント
-		//createDeploymentIOTS_SINGLENODE(clientset, "switches", "openshift/openvswitch:v3.9.0", i, 4, targetNode)   // コンテナBのデプロイメント
-		//createDeploymentIOTS_SINGLENODE(clientset, "hosts", "sugaott/sugaott-ubuntu-focal:1.4", i, 12, targetNode) // コンテナCのデプロイメント
+	for i := 80; i < sets; i++ {
+		//createDeploymentIOTS_SINGLENODE(clientset, "routers", "frrouting/frr:v8.1.0", i, 4, targetNode)              // コンテナAのデプロイメント
+		//createDeploymentIOTS_SINGLENODE(clientset, "switches", "sugaott/sugaott-ubuntu-focal:1.4", i, 4, targetNode) // コンテナBのデプロイメント
+		//createDeploymentIOTS_SINGLENODE(clientset, "hosts", "sugaott/sugaott-ubuntu-focal:1.4", i, 12, targetNode)   // コンテナCのデプロイメント
 
-		createDeploymentIOTS_MULTINODE(clientset, "routers", "frrouting/frr:v8.1.0", i, 4)            // コンテナAのデプロイメント
-		createDeploymentIOTS_MULTINODE(clientset, "switches", "openshift/openvswitch:v3.9.0", i, 4)   // コンテナBのデプロイメント
-		createDeploymentIOTS_MULTINODE(clientset, "hosts", "sugaott/sugaott-ubuntu-focal:1.4", i, 12) // コンテナCのデプロイメント
+		createDeploymentIOTS_MULTINODE(clientset, "routers", "frrouting/frr:v8.1.0", i, 4) // コンテナAのデプロイメント
+		//createDeploymentIOTS_MULTINODE(clientset, "switches", "openshift/openvswitch:v3.9.0", i, 4)   // コンテナBのデプロイメント
+		createDeploymentIOTS_MULTINODE(clientset, "switches", "sugaott/sugaott-ubuntu-focal:1.4", i, 4) // コンテナBのデプロイメント
+		createDeploymentIOTS_MULTINODE(clientset, "hosts", "sugaott/sugaott-ubuntu-focal:1.4", i, 12)   // コンテナCのデプロイメント
 
 	}
 }
